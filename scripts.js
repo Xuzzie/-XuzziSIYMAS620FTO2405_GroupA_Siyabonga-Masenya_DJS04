@@ -19,7 +19,7 @@ let matches = library.books; //
 
 // This will create a  a DOM efent  element for a book preview. */
 
-function createBookElement({ author, id, image, title }) {
+/*function createBookElement({ author, id, image, title }) {
   const element = document.createElement("button"); // This will create a button element
   element.classList = "preview"; // This will assign a class for styling
   element.setAttribute("data-preview", id); // Sets the id
@@ -36,7 +36,7 @@ function createBookElement({ author, id, image, title }) {
           </div>
       `;
   return element; // Return the button element
-}
+} */
 //This is somthing you need remember : "DocumentFragment" is a lightweight, invisible container that you can use to group multiple DOM elements before inserting them into the actual document. It’s often used to improve performance when updating or appending multiple elements to the DOM.
 function renderBookList(books, container) {
   const fragment = document.createDocumentFragment(); // Create a document fragment for efficient DOM updates

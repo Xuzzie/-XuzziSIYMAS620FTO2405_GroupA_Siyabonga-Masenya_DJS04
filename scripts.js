@@ -17,6 +17,7 @@ function createBookElement({ author, id, image, title }) {
   bookPreview.setAttribute("image", image);
   bookPreview.setAttribute("title", title);
   bookPreview.setAttribute("author", authors[author]);
+  bookPreview.setAttribute("data-preview", id); //this line of lacking code prevented me from opening the preview section of the page ,I used chatgpt to troubleshoot this issue
   return bookPreview;
 }
 

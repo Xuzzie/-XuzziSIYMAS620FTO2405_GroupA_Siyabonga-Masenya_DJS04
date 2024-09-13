@@ -2,6 +2,7 @@
 // This import brings in data from  The data.js file
 
 import { books, authors, genres, BOOKS_PER_PAGE } from "./data.js";
+import "./bookPreview.js";
 
 // Created an object `library` that contains arrays and objects  that have just been imported
 const library = {

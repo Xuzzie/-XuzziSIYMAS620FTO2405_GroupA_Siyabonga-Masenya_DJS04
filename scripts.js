@@ -11,6 +11,15 @@ const library = {
   genres,
 };
 
+//This is the web component for book reviews
+function createBookElement({ author, id, image, title }) {
+  const bookPreview = document.createElement("book-preview");
+  bookPreview.setAttribute("image", image);
+  bookPreview.setAttribute("title", title);
+  bookPreview.setAttribute("author", authors[author]);
+  return bookPreview;
+}
+
 //The following  two  defintion is from chatgpt  im keeping it here so i remember how it and why its done:
 //The page variable is crucial for managing which portion of the matches list is currently displayed. For example, if BOOKS_PER_PAGE is 10, and page is 1, then the first 10 books from the matches array will be displayed. As the user clicks a "Show more" button or navigates through pages, the page variable will be incremented to show the next set of books.
 //Filtering and Searching: The matches variable is dynamically updated based on user input (e.g., search terms, selected filters). When users search or apply filters, matches will only contain books that meet the criteria. The page variable will then help paginate through this filtered list.

@@ -124,6 +124,158 @@ function addEventListeners() {
   });
 }
 
+// Handle theme changes from the settings form
+document
+  .querySelector("[data-settings-form]")
+  .addEventListener("submit", (event) => {
+    event.preventDefault(); // Prevent default form submission
+    const formData = new FormData(event.target);
+    const { theme } = Object.fromEntries(formData); // Extract the selected theme from the form data
+
+    // Apply the selected theme colors to CSS variables
+    if (theme === "night") {
+      document.documentElement.style.setProperty(
+        "--color-dark",
+        "255, 255, 255"
+      );
+      document.documentElement.style.setProperty("--color-light", "10, 10, 20");
+    } else {
+      document.documentElement.style.setProperty("--color-dark", "10, 10, 20");
+      document.documentElement.style.setProperty(
+        "--color-light",
+        "255, 255, 255"
+      );
+    }
+
+    document.querySelector("[data-settings-overlay]").open = false; // Close settings overlay
+  });
+
+// Handle search form submission and filter books based on user input
+document
+  .querySelector("[data-search-form]")
+  .addEventListener("submit", (event) => {
+    event.preventDefault(); // Prevent default form submission
+    const formData = new FormData(event.target);
+    const filters = Object.fromEntries(formData); // Extract filter values from the form
+    const result = [];
+
+    // Filter books based on the search criteria
+    for (const book of library.books) {
+      let genreMatch = filters.genre === "any"; // Default to genre match
+
+      // Check if the book's genre matches the selected filter
+      for (const singleGenre of book.genres) {
+        if (genreMatch) break;
+        if (singleGenre === filters.genre) {
+          genreMatch = true;
+        }
+      }
+
+      // Check if the book matches title, author, and genre filters
+      if (
+        (filters.title.trim() === "" ||
+          book.title.toLowerCase().includes(filters.title.toLowerCase())) &&
+        (filters.author === "any" || book.author === filters.author) &&
+        genreMatch
+      ) {
+        result.push(book); // Add matching book to results
+      }
+    }
+
+    page = 1; // Reset page to 1 for new search
+    matches = result; // Update matches with search results
+
+    // Show or hide the message if no results are found
+    if (result.length < 1) {
+      document
+        .querySelector("[data-list-message]")
+        .classList.add("list__message_show");
+    } else {
+      document
+        .querySelector("[data-list-message]")
+        .classList.remove("list__message_show");
+    }
+
+    // Clear current book list and render new results
+    document.querySelector("[data-list-items]").innerHTML = "";
+    renderBookList(
+      result.slice(0, BOOKS_PER_PAGE), // Display only the first page of results
+      document.querySelector("[data-list-items]")
+    );
+    updateShowMoreButton(); // Update the "Show more" button
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Smoothly scroll to the top of the page
+    document.querySelector("[data-search-overlay]").open = false; // Close search overlay
+  });
+
+// Handle "Show more" button click to load more books
+document.querySelector("[data-list-button]").addEventListener("click", () => {
+  const fragment = document.createDocumentFragment(); // Create a document fragment for efficient DOM updates
+  renderBookList(
+    matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE), // Render the next page of books
+    fragment
+  );
+  document.querySelector("[data-list-items]").appendChild(fragment); // Append the new books to the container
+  page += 1; // Increment the page number
+  updateShowMoreButton(); // Update the "Show more" button
+});
+
+// Handle click on book preview to show detailed view
+document
+  .querySelector("[data-list-items]")
+  .addEventListener("click", (event) => {
+    const pathArray = Array.from(event.path || event.composedPath()); // Get the event path
+    let active = null;
+
+    // Traverse the event path to find the clicked book preview element
+    for (const node of pathArray) {
+      if (active) break;
+      if (node?.dataset?.preview) {
+        let result = null;
+
+        // Find the book that matches the clicked preview ID
+        for (const singleBook of library.books) {
+          if (result) break;
+          if (singleBook.id === node?.dataset?.preview) result = singleBook;
+        }
+
+        active = result;
+      }
+    }
+
+    // Show the detailed view if a book was found
+    if (active) {
+      document.querySelector("[data-list-active]").open = true;
+      document.querySelector("[data-list-blur]").src = active.image;
+      document.querySelector("[data-list-image]").src = active.image;
+      document.querySelector("[data-list-title]").innerText = active.title;
+      document.querySelector("[data-list-subtitle]").innerText = `${
+        library.authors[active.author]
+      } (${new Date(active.published).getFullYear()})`;
+      document.querySelector("[data-list-description]").innerText =
+        active.description;
+    }
+  });
+
+//To initialize the  setup
+function initialize() {
+  const starting = document.createDocumentFragment(); // Create a document fragment for initial render
+  renderBookList(matches.slice(0, BOOKS_PER_PAGE), starting); // Render the first page of books
+  document.querySelector("[data-list-items]").appendChild(starting); // Append initial books to the container
+
+  // Create and append dropdown options for genres and authors
+  const genreHtml = createDropdownOptions(library.genres, "All Genres");
+  document.querySelector("[data-search-genres]").appendChild(genreHtml);
+
+  const authorsHtml = createDropdownOptions(library.authors, "All Authors");
+  document.querySelector("[data-search-authors]").appendChild(authorsHtml);
+
+  setupTheme(); // Set up the initial theme
+  updateShowMoreButton(); // Set the initial state of the "Show more" button
+  addEventListeners(); // Attach event listeners for interactivity
+}
+
+initialize();
+
 /*import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
 let page = 1;
